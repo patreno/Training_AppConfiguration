@@ -1,9 +1,11 @@
-﻿using Azure.Identity;
+﻿using Azure.Core.Diagnostics;
+using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,11 +14,9 @@ namespace ConsoleAppWithDynamicPollConfig
 {
     class Startup
     {
-        public IConfiguration Configuration { get; private set; }
-
         public IServiceProvider ServiceProvider { get; private set; } = null!;
 
-        public IConfigurationRefresher Refresher { get; private set; } = null!;
+        //public IConfigurationRefresher Refresher { get; private set; } = null!;
 
         public Startup()
         {
@@ -29,14 +29,26 @@ namespace ConsoleAppWithDynamicPollConfig
                         .ConfigureRefresh(refresh =>
                         {
                             refresh.Register("TestApp:Settings:Message")
-                                   .SetRefreshInterval(TimeSpan.FromSeconds(30));
+                                   .SetRefreshInterval(TimeSpan.FromSeconds(10));
                         });
-                Refresher = options.GetRefresher();
+                //Refresher = options.GetRefresher();
             });
 
-            Configuration = builder.Build();
+            var configuration = builder.Build();
 
             var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(configuration);
+            services.AddAzureAppConfiguration();
+
+            services.AddTransient<SampleConfigRefresher>();
+
+            using var listener = new AzureEventSourceListener((eventData, text) =>
+            {
+                if (eventData.EventSource.Name == "Microsoft-Extensions-Configuration-AzureAppConfiguration-Refresh")
+                {
+                    Console.WriteLine("[{1}] {0}: {2}", eventData.EventSource.Name, eventData.Level, text);
+                }
+            }, EventLevel.Verbose);
 
             ServiceProvider = services.BuildServiceProvider();
         }

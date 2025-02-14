@@ -1,8 +1,6 @@
-## ## Statuc Configuration example with Azure App Configuration
+﻿## Dynamic Configuration with Poll model
 
-Code from tutorial:
-https://learn.microsoft.com/en-us/azure/azure-app-configuration/quickstart-dotnet-core-app?tabs=entra-id
-
+Example based on https://learn.microsoft.com/en-us/azure/azure-app-configuration/enable-dynamic-configuration-dotnet-core
 
 ### Usage
 

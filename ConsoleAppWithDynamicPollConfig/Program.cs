@@ -1,19 +1,21 @@
 ﻿using ConsoleAppWithDynamicPollConfig;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 
 var startup = new Startup();
 
-var _configuration = startup.Configuration;
-var _refresher = startup.Refresher;
+var configuration = startup.ServiceProvider.GetService<IConfiguration>();
 
-Console.WriteLine(_configuration["TestApp:Settings:Message"] ?? "Hello world!");
+Console.WriteLine(configuration["TestApp:Settings:Message"] ?? "Hello world!");
 
 // Wait for the user to press Enter
 Console.ReadLine();
 
-if (_refresher != null)
+var refresher = startup.ServiceProvider.GetService<SampleConfigRefresher>();
+if (refresher != null)
 {
-    await _refresher.TryRefreshAsync();
-    Console.WriteLine(_configuration["TestApp:Settings:Message"] ?? "Hello world!");
+    await refresher.RefreshConfiguration();
+    Console.WriteLine(configuration["TestApp:Settings:Message"] ?? "Hello world!");
 
 }
