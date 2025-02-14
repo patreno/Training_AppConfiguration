@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ConsoleAppWithDynamicPollConfig": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "Training_AppConfig_Endpoint": "https://appconfigparetraining.azconfig.io"
+      }
+    }
+  }
+}
